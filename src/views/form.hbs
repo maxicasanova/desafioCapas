@@ -1,0 +1,15 @@
+{{> nav}}
+
+<div class="container-fluid">
+    <h1>Bienvenidos</h1>
+    <p>Puede agregar un producto desde el siguiente formulario o dirijase a Productos para ver aquellos disponibles.</p>
+    <form action="/api/productos" method="POST" class="d-flex flex-column" style="width:300px">
+        Titulo:
+        <input type="text" name="title">
+        Precio:
+        <input type="number" name="price">
+        URL Foto:
+        <input type="text" name="thumbnail">
+        <input type="submit" value="Agregar" class="btn btn-secondary mt-2" >
+    </form>
+</div>

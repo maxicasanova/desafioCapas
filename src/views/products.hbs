@@ -1,0 +1,14 @@
+{{> nav}}
+
+<div class="container d-flex justify-content-center flex-wrap">
+    {{#if list.length}}
+        {{#each list}}
+        <div class="card p-3 m-2" style="width: 18rem;">
+            {{>product}}
+            <a href='/api/productos/{{this.id}}' class="btn btn-primary">Ver producto</a>
+        </div>
+        {{/each}}
+    {{else}}
+        <p>No hay productos</p>
+    {{/if}}
+</div>

@@ -1,0 +1,9 @@
+{{#if messagesArray}}
+        {{#each messagesArray}}
+            <span style="font-weight: 800; color:{{color}}">{{username}}</span>
+            <span class="text-secondary">{{fechaYHora}}</span>
+            <p>{{message}}</p>
+        {{/each}}
+{{else}}
+    <p>No hay mensajes todavia.</p>
+{{/if}}
