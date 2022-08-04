@@ -3,21 +3,20 @@ const router = Router();
 
 const {
         getProducts, 
-        // getHome, 
         postProduct, 
-        getProduct
+        getProduct,
+        getTestProducts
     } = require('../controllers/routesController');
 
 
-// router.get('/', getHome);
 
 router.get('/productos', getProducts);
 
 router.post('/productos', postProduct);
 
-// en funcion del id
-
 router.get('/productos/:id', getProduct);
+
+router.get('/productos-test', getTestProducts)
 
 
 module.exports = router;

@@ -1,16 +1,5 @@
-// const listaProductos = require('../../utils/listaProductos');
-// const Contenedor = require('../contenedor');
-
-// const productos = new Contenedor('productos');
-
-// async function cargarProductos () {
-//     for(let i = 0; i< listaProductos.length; i++ ){
-//         await productos.save(listaProductos[i]);
-//     }
-// }
-
-// cargarProductos();
-
+const faker = require("@faker-js/faker").faker
+faker.locale = "es"
 
 const getProducts = (req, res) => {
     const list = productos.getAll()
@@ -22,9 +11,6 @@ const getProducts = (req, res) => {
     }
 };
 
-// const getHome = (req, res) => {
-//     res.render('form', {})
-// }
 
 const postProduct = (req, res) => {
     const {title, price, thumbnail} = req.body;
@@ -48,9 +34,28 @@ const getProduct = (req, res) => {
     }
 }
 
+const getTestProducts = (req, res) => {
+    let list = [];
+
+    for (i=0; i<5; i++){
+        let producto = {};
+        producto.title = faker.commerce.productName();
+        producto.thumbnail = faker.image.image();
+        producto.price = faker.commerce.price();
+        list.push(producto)
+    }
+
+    try{
+        res.render('products', {list})
+    } catch (e){
+        console.log(e)
+        res.sendStatus(500);
+    }
+}
+
 module.exports = {
     getProducts,
-    // getHome,
     postProduct,
-    getProduct
+    getProduct,
+    getTestProducts
 }

@@ -33,13 +33,19 @@
     <div id="chatapp" class="container d-flex justify-content-center flex-column align-items-center m-4" style="max-width: 500px; background-color: antiquewhite;">
         <h1>Centro de mensajes</h1>
         <form id="messageForm">
-        <input type="email" placeholder="Mail" id="userNameInput" style="align-self: flex-start;margin-left: 10px;" required>
+        <input type="email" placeholder="Mail" id="userMailInput" style="align-self: flex-start;margin-left: 10px;" required>
+        <input type="text" placeholder="Nombre" id="userNameInput" style="align-self: flex-start;margin-left: 10px;">
+        <input type="text" placeholder="Apellido" id="userLastNameInput" style="align-self: flex-start;margin-left: 10px;">
+        <input type="number" placeholder="Edad" id="userAgeInput" style="align-self: flex-start;margin-left: 10px;">
+        <input type="text" placeholder="Alias" id="userAliasInput" style="align-self: flex-start;margin-left: 10px;">
+        <input type="text" placeholder="Avatar" id="userAvatarInput" style="align-self: flex-start;margin-left: 10px;">
         <div id="messagesPool" class="container" style="overflow: auto; max-height: 300px; overflow-x: hidden;"></div>
             <input type="text" placeholder="Mensaje" id="messageInput" class="p-1 mt-2">
             <input type="submit" value="Enviar" class="btn btn-secondary">
         </form>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/normalizr@3.6.1/dist/normalizr.browser.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="./cliente.socket.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>

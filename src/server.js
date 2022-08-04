@@ -5,8 +5,9 @@ const app = express();
 const puerto = 8080;
 const path = require('path');
 const {engine} = require('express-handlebars');
-const listaProductos = require('../utils/listaProductos');
 const Contenedor = require('./contenedor');
+const ContenedorMongo = require('./contenedorMongo');
+const normalizeMensajes = require("../utils/normalize");
 
 const config1 = {
     client: 'mysql',
@@ -19,26 +20,19 @@ const config1 = {
     }
 };
 
-const config2 = {
-    client: 'sqlite3',
-    connection: {
-        filename: path.join(__dirname, '../DB/ecommerce.sqlite')
-    },
-    useNullAsDefault: true
-}
-
 const productos = new Contenedor(config1, 'productos');
-const messages = new Contenedor(config2, 'mensajes');
-let messagesArray = [];
-let productsArray = [];
+const messages = new ContenedorMongo('mensajes', {
+    author: {
+        id: { type: String, required: true },
+        nombre: { type: String, required: true },
+        apellido: { type: String, required: true },
+        edad: { type: Number, required: true },
+        alias: { type: String, required: true },
+        avatar: { type: String, required: true }
+    },
+    text: { type: String, required: true }
+});
 
-// async function cargarProductos () {
-//     for(let i = 0; i< listaProductos.length; i++ ){
-//         await productos.save(listaProductos[i]);
-//     }
-// }
-
-// cargarProductos();
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
@@ -78,21 +72,26 @@ const io = new IOServer(expressServer);
 
 io.on('connection', async socket => {
     console.log('se conecto un usuario', socket.id);
-    messagesArray = await messages.getAll();
-    productsArray = await productos.getAll();
-    console.log(productsArray)
-    socket.emit('server:messages', messagesArray);
+
+    const messagesArray = await messages.getAll();
+    const normalizedMensajes = normalizeMensajes(messagesArray);
+    const productsArray = await productos.getAll();
+
+    socket.emit('server:messages', normalizedMensajes);
     socket.emit('server:products', productsArray);
 
     socket.on('client:message', async messageInfo => {
         await messages.save(messageInfo);
-        messagesArray = await messages.getAll();
-        io.emit('server:messages', messagesArray);
+
+        const messagesArray = await messages.getAll();
+        const normalizedMensajes = normalizeMensajes(messagesArray);
+
+        io.emit('server:messages', normalizedMensajes);
     })
 
     socket.on('client:product', async productInfo => {
         await productos.save(productInfo);
-        productsArray = await productos.getAll();
+        const productsArray = await productos.getAll();
         io.emit('server:products', productsArray);
     })
 })
