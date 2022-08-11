@@ -8,6 +8,10 @@ const {engine} = require('express-handlebars');
 const Contenedor = require('./contenedor');
 const ContenedorMongo = require('./contenedorMongo');
 const normalizeMensajes = require("../utils/normalize");
+const cookieParser = require("cookie-parser");
+const session = require("express-session");
+const MongoStore = require("connect-mongo") ;
+
 
 const config1 = {
     client: 'mysql',
@@ -47,7 +51,71 @@ app.engine('hbs', engine({
     partialDir: path.join(__dirname, './views/partials')
 }));
 
+app.use(cookieParser());
+
+const mongoOptions = { useNewUrlParser: true, useUnifiedTopology: true };
+
+app.use(
+    session({
+        store: MongoStore.create({
+            mongoUrl:
+                "mongodb+srv://maxicasanova:maxi1234@cluster0.3hphm.mongodb.net/ecommerce?retryWrites=true&w=majority",
+            mongoOptions,
+        }),
+        secret: "coderhouse",
+        resave: false,
+        saveUninitialized: false,
+        rolling: true,
+        cookie: {
+            maxAge: 20000,
+        },
+    })
+)
+
+app.use(function (req, res, next) {
+    if (req.session.admin === true) {
+        next();
+    } else {
+        if (!req.session.redirect){
+            req.session.redirect = true
+            res.redirect('/login');
+        } else {
+            next();
+        }
+    }
+})
+
 app.use(express.static(path.join(__dirname, '..','./public/')));
+
+app.get("/login", (req, res) => {
+    res.render('login', {});
+})
+
+app.post("/login", (req, res) => {
+    const { username } = req.body;
+    req.session.user = username;
+    req.session.admin = true;
+    res.redirect('/')
+})
+
+app.get("/logged", (req, res) => {
+    if (req.session.user) {
+        res.json({user: req.session.user})
+    } else {
+        res.status(401).json({ status: 401, code: "no credentials" })
+    }
+})
+
+app.get("/logout", (req, res) => {
+    const nombre = req.session.user;
+    req.session.destroy(err => {
+        if (err) {
+            res.status(500).json({ status: "error", body: err })
+        } else {
+            res.render('logout', {nombre})
+        }
+    })
+})
 
 app.use('/api', rutas);
 

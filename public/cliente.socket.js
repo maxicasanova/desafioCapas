@@ -13,6 +13,15 @@ const prodTitle = document.querySelector('#prodTitle');
 const prodPrice = document.querySelector('#prodPrice');
 const prodImage = document.querySelector('#prodImage');
 const productsPool = document.querySelector('#productsPool');
+const greeting = document.querySelector('#greeting');
+
+
+fetch('/logged').then(res => {
+    return res.json()
+}).then(res => {
+    greeting.innerHTML = `<div><h1>Bienvenido ${res.user}</h1><a href="/logout">Logout</a></div>`
+
+})
 
 function denormalizeMensajes(objMensajes) {
     const author = new normalizr.schema.Entity(
