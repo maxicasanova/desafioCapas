@@ -1,9 +1,13 @@
 <div class="container-fluid">
     <h1>Bienvenidos</h1>
-    <p>Para ingresar ingrese su nombre.</p>
+    <p>Para ingresar ingrese sus credenciales.</p>
     <form action="/login" method="POST" class="d-flex flex-column" style="width:300px">
-        Nombre:
+        Mail:
         <input type="text" name="username">
+        Contrasena:
+        <input type="password" name="password">
         <input type="submit" value="Ingresar" class="btn btn-secondary mt-2" >
     </form>
+    <p>Todavia no te registraste? Dirigite a la pagina de registro con el siguiente link</p>
+    <a href="/register">Register</a>
 </div>

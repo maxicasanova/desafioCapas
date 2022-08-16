@@ -11,7 +11,10 @@ const normalizeMensajes = require("../utils/normalize");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const MongoStore = require("connect-mongo") ;
-
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const bcrypt = require('bcrypt');
+const User = require('./models/User.js');
 
 const config1 = {
     client: 'mysql',
@@ -23,6 +26,14 @@ const config1 = {
         database : 'desafiocoder'
     }
 };
+
+function createHash(password){
+    return bcrypt.hashSync(password, bcrypt.genSaltSync(10))
+}
+
+function isValidPass(reqpass, dbpass) {
+    return bcrypt.compareSync(reqpass, dbpass)
+}
 
 const productos = new Contenedor(config1, 'productos');
 const messages = new ContenedorMongo('mensajes', {
@@ -53,69 +64,130 @@ app.engine('hbs', engine({
 
 app.use(cookieParser());
 
-const mongoOptions = { useNewUrlParser: true, useUnifiedTopology: true };
-
 app.use(
     session({
-        store: MongoStore.create({
-            mongoUrl:
-                "mongodb+srv://maxicasanova:maxi1234@cluster0.3hphm.mongodb.net/ecommerce?retryWrites=true&w=majority",
-            mongoOptions,
-        }),
         secret: "coderhouse",
-        resave: false,
-        saveUninitialized: false,
-        rolling: true,
         cookie: {
+            httpOnly: false,
+            secure: false,
             maxAge: 20000,
         },
+        rolling: true,
+        resave: false,
+        saveUninitialized: false,
     })
 )
 
-app.use(function (req, res, next) {
-    if (req.session.admin === true) {
+app.use(passport.initialize());
+app.use(passport.session());
+
+function checkAuth(req, res, next){
+    if (req.isAuthenticated()) {
         next();
     } else {
-        if (!req.session.redirect){
-            req.session.redirect = true
-            res.redirect('/login');
-        } else {
-            next();
-        }
+        res.redirect('/login')
     }
+}
+
+const singupStrategy = new LocalStrategy(
+    {passReqToCallback:true}, 
+    async (req, username, password, done) => {
+        try{
+            const existingUser = await User.findOne({username})
+            if(existingUser){
+                return done(null, null)
+            }
+            const newUser = {
+                username, 
+                password: createHash(password)
+            }
+            const createdUser = await User.create(newUser);
+            return done(null, createdUser)
+        } catch (err){
+            console.log(err)
+            done('error en registro', null)
+        }
+
 })
 
-app.use(express.static(path.join(__dirname, '..','./public/')));
+const loginStrategy = new LocalStrategy(
+    async (username, password, done) => {
+        try {
+            const user = await User.findOne({username});
+
+            if(!user || !isValidPass(password,user.password)){
+                return done(null, null);
+            }
+
+            done(null, user);
+
+        } catch (err) {
+            console.log(err)
+            done('error en acceso', null)
+        }
+    }
+)
+
+passport.use('register', singupStrategy);
+passport.use('login', loginStrategy);
+passport.serializeUser((user, done) => {
+    done(null, user._id)
+})
+passport.deserializeUser((id, done) => {
+    User.findById(id, done)
+})
+
 
 app.get("/login", (req, res) => {
     res.render('login', {});
 })
 
-app.post("/login", (req, res) => {
-    const { username } = req.body;
-    req.session.user = username;
-    req.session.admin = true;
-    res.redirect('/')
+app.post(
+    "/login", 
+    passport.authenticate('login', {failureRedirect:'/faillogin'}) ,
+    (req, res) => {
+        res.redirect('/')
+})
+
+app.get('/faillogin', (req, res) => {
+    res.render('faillogin', {})
 })
 
 app.get("/logged", (req, res) => {
-    if (req.session.user) {
-        res.json({user: req.session.user})
+    if (req.user) {
+        res.json({user: req.user.username})
     } else {
-        res.status(401).json({ status: 401, code: "no credentials" })
+        res.status(401).json({ status: 401, message: "no credentials" })
     }
 })
 
 app.get("/logout", (req, res) => {
-    const nombre = req.session.user;
-    req.session.destroy(err => {
-        if (err) {
-            res.status(500).json({ status: "error", body: err })
-        } else {
-            res.render('logout', {nombre})
-        }
+    const nombre = req.user?.username;
+    req.logout(function(err) {
+        if (err) { return next(err); }
+        res.render('logout', {nombre})
     })
 })
+
+app.get('/register', (req, res) => {
+    res.render('register', {});
+})
+
+
+app.post(
+    '/register', 
+    passport.authenticate('register', {failureRedirect:'/failsignup'}) ,
+    (req, res) => {
+        res.redirect('/login')
+})
+
+app.get('/failsignup', (req, res) => {
+    res.render('failsignup', {})
+})
+
+app.use(checkAuth);
+
+app.use(express.static(path.join(__dirname, '..','./public/')));
 
 app.use('/api', rutas);
 
