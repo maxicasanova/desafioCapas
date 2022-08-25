@@ -2,7 +2,6 @@ const express = require('express');
 const {Server: IOServer} = require('socket.io');
 const rutas = require('./routes/index');
 const app = express();
-const puerto = 8080;
 const path = require('path');
 const {engine} = require('express-handlebars');
 const Contenedor = require('./contenedor');
@@ -15,6 +14,11 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcrypt');
 const User = require('./models/User.js');
+const config = require("./config");
+const args = require("yargs/yargs")(process.argv.slice(2)).argv;
+
+
+const port = config.port;
 
 const config1 = {
     client: 'mysql',
@@ -187,6 +191,27 @@ app.get('/failsignup', (req, res) => {
 
 app.use(checkAuth);
 
+app.get("/info", (req, res) => {
+    const platform = process.platform;
+    const version = process.version;
+    const memory = process.memoryUsage();
+    const path = process.execPath;
+    const pid = process.pid;
+    const folder = process.cwd();
+    
+    const objetoInfo = {
+        args,
+        platform,
+        version,
+        memory,
+        path,
+        pid,
+        folder
+    }
+
+    res.json(objetoInfo);
+})
+
 app.use(express.static(path.join(__dirname, '..','./public/')));
 
 app.use('/api', rutas);
@@ -200,11 +225,11 @@ app.use((err, req, res) => {
     res.status(500).send("Ocurrió un error");
 });
 
-const expressServer = app.listen(puerto, err => {
+const expressServer = app.listen(port, err => {
     if (err) {
         console.log(`Hubo un error al inciar el servidor : ${err}`);
     } else {
-        console.log(`Servidor escuchando el puerto: ${puerto}`);
+        console.log(`Servidor escuchando el puerto: ${port}`);
     };
 });
 

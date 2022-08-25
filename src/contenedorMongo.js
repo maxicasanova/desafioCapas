@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
+const config = require("./config");
 
 const main = async () => {
-    await mongoose.connect('mongodb+srv://maxicasanova:maxi1234@cluster0.3hphm.mongodb.net/ecommerce?retryWrites=true&w=majority')
+    await mongoose.connect(config.mongoconnect)
 }
 
 main();

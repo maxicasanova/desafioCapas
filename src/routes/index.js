@@ -5,7 +5,8 @@ const {
         getProducts, 
         postProduct, 
         getProduct,
-        getTestProducts
+        getTestProducts,
+        getRandoms
     } = require('../controllers/routesController');
 
 
@@ -17,6 +18,8 @@ router.post('/productos', postProduct);
 router.get('/productos/:id', getProduct);
 
 router.get('/productos-test', getTestProducts)
+
+router.get('/randoms', getRandoms)
 
 
 module.exports = router;

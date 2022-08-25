@@ -1,5 +1,6 @@
-const faker = require("@faker-js/faker").faker
-faker.locale = "es"
+const faker = require("@faker-js/faker").faker;
+faker.locale = "es";
+const {fork} = require("child_process");
 
 const getProducts = (req, res) => {
     const list = productos.getAll()
@@ -53,9 +54,24 @@ const getTestProducts = (req, res) => {
     }
 }
 
+const getRandoms = (req, res) => {
+    const calc = fork("./utils/calcRandoms.js");
+
+    let cant = req.query.cant;
+    if (isNaN(cant)){
+        cant = 1000000;
+    }
+
+    calc.send(cant);
+    calc.on('message', numbers=>{
+        res.json(numbers);
+    })
+}
+
 module.exports = {
     getProducts,
     postProduct,
     getProduct,
-    getTestProducts
+    getTestProducts,
+    getRandoms
 }
