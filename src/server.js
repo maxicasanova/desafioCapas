@@ -18,6 +18,8 @@ const config = require("./config");
 const args = require("yargs/yargs")(process.argv.slice(2)).argv;
 const cluster = require('cluster');
 const os = require('os');
+const compression = require("compression");
+const logger = require("./logs/logger")
 
 const cpus = os.cpus();
 const port = config.port;
@@ -64,6 +66,8 @@ if (config.mode === "cluster" && cluster.isPrimary) {
         cluster.fork();
     })
 } else {
+
+    app.use(compression())
 
     app.use(express.json());
     app.use(express.urlencoded({extended: true}));
@@ -153,6 +157,10 @@ if (config.mode === "cluster" && cluster.isPrimary) {
         User.findById(id, done)
     })
 
+    app.use((req, res, next)=>{
+        logger.info(`New request: ${req.method} - ${req.path}`)
+        next()
+    })
 
     app.get("/login", (req, res) => {
         res.render('login', {});
@@ -221,6 +229,29 @@ if (config.mode === "cluster" && cluster.isPrimary) {
             folder
         }
 
+        res.json(objetoInfo);
+    });
+
+    app.get("/infoconsolelog",(req, res) => {
+        const platform = process.platform;
+        const version = process.version;
+        const memory = process.memoryUsage();
+        const path = process.execPath;
+        const pid = process.pid;
+        const folder = process.cwd();
+        const cpus = os.cpus().length;
+        
+        const objetoInfo = {
+            args,
+            platform,
+            version,
+            memory,
+            path,
+            pid,
+            folder,
+            cpus
+        }
+        console.log(objetoInfo)
         res.json(objetoInfo);
     })
 

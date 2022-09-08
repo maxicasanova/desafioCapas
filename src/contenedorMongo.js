@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const config = require("./config");
+const logger = require("./logs/logger")
 
 const main = async () => {
     await mongoose.connect(config.mongoconnect)
@@ -13,19 +14,22 @@ class ContenedorMongo {
     }
     async save(obj) {
         try {
-            const model = new this.model(obj)
-            await model.save()
-            console.log(`Se agrego el objeto`);
+            const model = new this.model(obj);
+            await model.save();
+            logger.info("Mensaje guardado con exito");
         } catch (error) {
-            console.log(`No se ha podido guardar el objeto: ${error}`);
+            logger.error("Error guardando mensaje: ", error)
+            return {error: "Error guardando mensaje."}
         }
     }
     async getAll(){
         try{
             const data  = await this.model.find({})
+            logger.info("Productos cargados con exito");
             return data;
         } catch (error) {
-            console.log(`No se encontro el objeto: ${error}`);
+            logger.error("Error cargando productos.", error)
+            return {error: "Error guardando productos"}
         }
     }
 }

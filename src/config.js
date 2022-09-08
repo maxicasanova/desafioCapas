@@ -12,4 +12,5 @@ module.exports = {
     sessionsecret: process.env.SESSIONSECRET,
     mongoconnect: process.env.MONGOCONNECT,
     mode: args.mode,
+    node_env: process.env.NODE_ENV
 }

@@ -1,4 +1,5 @@
 const knex = require('knex');
+const logger = require("./logs/logger")
 
 class Contenedor{
     constructor(config, tableName){
@@ -16,8 +17,8 @@ class Contenedor{
                         table.integer('price').notNullable();
                         table.string('thumbnail', 200).notNullable();
                     });
+                    logger.info("Tabla creada con exito");
                 } else if (tableName === 'mensajes' && !exist){
-                    console.log('entre')
                     await database.schema.createTable(tableName, table => {
                         table.increments('id').primary();
                         table.string('username', 50).notNullable();
@@ -25,11 +26,11 @@ class Contenedor{
                         table.string('fechaYHora', 50).notNullable();
                         table.string('color', 50).notNullable();
                     });
-                    console.log('tabla creada')
+                    logger.info("Tabla creada con exito");
                 }
                 database.destroy();
             } catch (error) {
-                console.log(error);
+                logger.error("Error creando tabla: ", error);
                 database.destroy();
             }
         };
@@ -39,10 +40,10 @@ class Contenedor{
         const database = knex(this.config);
         try {
             await database(this.tableName).insert(obj)
-            console.log(`Se agrego el objeto`);
+            logger.info("Producto guardado con exito");
             database.destroy();
         } catch (error) {
-            console.log(`No se ha podido guardar el objeto: ${error}`);
+            logger.error("Error guardando el objeto: ", error);
             database.destroy();
         }
     }
@@ -50,11 +51,11 @@ class Contenedor{
         const database = knex(this.config);
         try {
             const objeto = await database.from(this.tableName).select('*').where('id', '=', id)
-            console.log(`Se encontro el objeto: ${objeto.title}`);
+            logger.info("Se encontro el objeto: ", objeto.title);
             database.destroy();
             return objeto[0];
         } catch (error) {
-            console.log(`No se encontro el objeto: ${error}`);
+            logger.error("No se encontro el objeto: ", error);
             database.destroy();
             return null;
         }
@@ -63,11 +64,11 @@ class Contenedor{
         try {
             const database = knex(this.config);
             const objetos = await database.from(this.tableName).select('*')
-            console.log(`Se encontraron los objetos`);
+            logger.info("Se encontro el objetos.");
             database.destroy();
             return objetos;
         } catch (error) {
-            console.log(`No se encontraron los objetos: ${error}`);
+            logger.error("No se encontro el objetos.");
             database.destroy();
             return null;
         }
