@@ -268,7 +268,7 @@ if (config.mode === "cluster" && cluster.isPrimary) {
         res.status(500).send("Ocurrió un error");
     });
 
-    const expressServer = app.listen(port, err => {
+    const expressServer = app.listen( process.env.port || port, err => {
         if (err) {
             console.log(`Hubo un error al inciar el servidor : ${err}`);
         } else {
