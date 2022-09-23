@@ -4,8 +4,6 @@ const rutas = require('./routes/index');
 const app = express();
 const path = require('path');
 const {engine} = require('express-handlebars');
-const Contenedor = require('./contenedor');
-const ContenedorMongo = require('./contenedorMongo');
 const normalizeMensajes = require("../utils/normalize");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
@@ -20,20 +18,15 @@ const cluster = require('cluster');
 const os = require('os');
 const compression = require("compression");
 const logger = require("./logs/logger")
+const multer  = require('multer')
+const {productos, carritos, messages} = require('./models/index.js')
+
+const upload = multer({ dest: '../public/uploads' })
 
 const cpus = os.cpus();
 const port = config.port;
 
-const config1 = {
-    client: 'mysql',
-    connection: {
-        host : '127.0.0.1',
-        port : 3306,
-        user : 'root',
-        password : '',
-        database : 'desafiocoder'
-    }
-};
+const mongoStoreOptions = { useNewUrlParser: true, useUnifiedTopology: true };
 
 function createHash(password){
     return bcrypt.hashSync(password, bcrypt.genSaltSync(10))
@@ -43,18 +36,6 @@ function isValidPass(reqpass, dbpass) {
     return bcrypt.compareSync(reqpass, dbpass)
 }
 
-const productos = new Contenedor(config1, 'productos');
-const messages = new ContenedorMongo('mensajes', {
-    author: {
-        id: { type: String, required: true },
-        nombre: { type: String, required: true },
-        apellido: { type: String, required: true },
-        edad: { type: Number, required: true },
-        alias: { type: String, required: true },
-        avatar: { type: String, required: true }
-    },
-    text: { type: String, required: true }
-});
 
 if (config.mode === "cluster" && cluster.isPrimary) {
     cpus.map(() => {
@@ -86,15 +67,19 @@ if (config.mode === "cluster" && cluster.isPrimary) {
 
     app.use(
         session({
-            secret: "coderhouse",
+            store: MongoStore.create({
+                mongoUrl:
+                    config.mongoconnect,
+                mongoStoreOptions,
+            }),
+            secret: config.sessionsecret,
+            resave: true,
+            saveUninitialized: true,
             cookie: {
-                httpOnly: false,
-                secure: false,
-                maxAge: 20000,
+                maxAge: 120000
             },
             rolling: true,
-            resave: false,
-            saveUninitialized: false,
+            // saveUninitialized: false,
         })
     )
 
@@ -111,7 +96,7 @@ if (config.mode === "cluster" && cluster.isPrimary) {
 
     const singupStrategy = new LocalStrategy(
         {passReqToCallback:true}, 
-        async (req, username, password, done) => {
+        async (req, username, password, name, address, age, telephone, done) => {
             try{
                 const existingUser = await User.findOne({username})
                 if(existingUser){
@@ -119,7 +104,11 @@ if (config.mode === "cluster" && cluster.isPrimary) {
                 }
                 const newUser = {
                     username, 
-                    password: createHash(password)
+                    password: createHash(password),
+                    name, 
+                    address, 
+                    age, 
+                    telephone
                 }
                 const createdUser = await User.create(newUser);
                 return done(null, createdUser)
@@ -177,9 +166,11 @@ if (config.mode === "cluster" && cluster.isPrimary) {
         res.render('faillogin', {})
     })
 
-    app.get("/logged", (req, res) => {
+    app.get("/logged", async (req, res) => {
         if (req.user) {
-            res.json({user: req.user.username})
+            const info = await User.findOne({username:req.user.username})
+            res.json({user:info.username, admin:info.admin})
+            // {user: req.user.username}
         } else {
             res.status(401).json({ status: 401, message: "no credentials" })
         }
@@ -201,6 +192,7 @@ if (config.mode === "cluster" && cluster.isPrimary) {
     app.post(
         '/register', 
         passport.authenticate('register', {failureRedirect:'/failsignup'}) ,
+        upload.single('avatar'),
         (req, res) => {
             res.redirect('/login')
     })

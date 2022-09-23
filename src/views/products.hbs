@@ -6,6 +6,7 @@
         <div class="card p-3 m-2" style="width: 18rem;">
             {{>product}}
             <a href='/api/productos/{{this.id}}' class="btn btn-primary">Ver producto</a>
+            <a href='/api/productos/{{this.id}}' class="btn btn-primary">Agregar al carrito</a>
         </div>
         {{/each}}
     {{else}}

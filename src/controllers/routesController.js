@@ -1,6 +1,7 @@
 const faker = require("@faker-js/faker").faker;
 faker.locale = "es";
 const {fork} = require("child_process");
+const {productos} = require('../models/index.js')
 
 const getProducts = (req, res) => {
     const list = productos.getAll()

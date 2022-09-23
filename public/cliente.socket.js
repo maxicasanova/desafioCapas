@@ -14,13 +14,21 @@ const prodPrice = document.querySelector('#prodPrice');
 const prodImage = document.querySelector('#prodImage');
 const productsPool = document.querySelector('#productsPool');
 const greeting = document.querySelector('#greeting');
+const formProduct = document.querySelector('#formProduct');
+let activeUser = '';
+let admin = false;
 
 
 fetch('/logged').then(res => {
     return res.json()
 }).then(res => {
-    greeting.innerHTML = `<div><h1>Bienvenido ${res.user}</h1><a href="/logout">Logout</a></div>`
-
+    activeUser = res.user;
+    admin = res.admin;
+    greeting.innerHTML = `<div><h1>Bienvenido ${res.user}</h1><a href="/logout">Logout</a></div><a href="/carrito">Ir al carrito</a>`;
+    if (!admin) {
+        formProduct.style.visibility='hidden';
+    }
+    userMailInput.innerHTML = res.user;
 })
 
 function denormalizeMensajes(objMensajes) {
@@ -97,15 +105,15 @@ async function renderProducts(productsArray){;
 
 messageForm.addEventListener('submit', e => {
     e.preventDefault();
-    if(userMailInput.value&&messageInput.value){
+    if(messageInput.value){
         const messageInfo = {
             author: {
-                id: userMailInput.value,
-                nombre: userNameInput.value || "nombreDefault",
-                apellido: userLastNameInput.value || "apellidoDefault",
-                edad: userAgeInput.value || 99,
-                alias: userAliasInput.value || "aliasDefault",
-                avatar: userAvatarInput.value || "avatarDefault"
+                id: activeUser,
+                nombre: "nombreDefault",
+                apellido: "apellidoDefault",
+                edad: 99,
+                alias: "aliasDefault",
+                avatar: "avatarDefault"
             },
             text: messageInput.value
         }

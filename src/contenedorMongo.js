@@ -32,6 +32,26 @@ class ContenedorMongo {
             return {error: "Error guardando productos"}
         }
     }
+    async getById(id){
+        try{
+            const data  = await this.model.findOne({_id:id})
+            logger.info("Se encontro el producto con id", id);
+            return data;
+        } catch (error) {
+            logger.error("Error cargando productos.", error)
+            return {error: "Error guardando productos"}
+        }
+    }
+    async getByUser(user){
+        try{
+            const data  = await this.model.findOne({user:user})
+            logger.info("Se la informacion del usuario", user);
+            return data;
+        } catch (error) {
+            logger.error("Error cargando productos.", error)
+            return {error: "Error guardando productos"}
+        }
+    }
 }
 
 module.exports = ContenedorMongo;

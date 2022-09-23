@@ -1,11 +1,21 @@
 <div class="container-fluid">
     <h1>Bienvenidos</h1>
     <p>Para ingresar ingrese sus credenciales.</p>
-    <form action="/register" method="POST" class="d-flex flex-column" style="width:300px">
+    <form action="/register" method="POST" class="d-flex flex-column" style="width:300px" enctype="multipart/form-data">
         Mail:
         <input type="text" name="username">
         Contrasena:
         <input type="password" name="password">
+        Avatar:
+        <input type="file" name="avatar">
+        Nombre:
+        <input type="text" name="name">
+        Direccion:
+        <input type="text" name="address">
+        Edad:
+        <input type="text" name="age">
+        Telefono:
+        <input type="number" name="telephone">
         <input type="submit" value="Registrarse" class="btn btn-secondary mt-2" >
     </form>
     <a href="/login">Log in</a>
