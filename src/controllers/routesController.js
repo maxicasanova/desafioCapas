@@ -1,10 +1,10 @@
 const faker = require("@faker-js/faker").faker;
 faker.locale = "es";
 const {fork} = require("child_process");
-const {productos} = require('../models/index.js')
+const {productos, carritos} = require('../models/index.js')
 
-const getProducts = (req, res) => {
-    const list = productos.getAll()
+const getProducts =  async (req, res) => {
+    const list =  await productos.getAll()
     try{
         res.render('products', {list})
     } catch (e){
@@ -14,10 +14,10 @@ const getProducts = (req, res) => {
 };
 
 
-const postProduct = (req, res) => {
+const postProduct = async (req, res) => {
     const {title, price, thumbnail} = req.body;
     try {
-        const prod = productos.save({title, price, thumbnail});
+        const prod = await productos.save({title, price, thumbnail});
         res.redirect('/');
     } catch (error) {
         console.log(error);
@@ -25,10 +25,10 @@ const postProduct = (req, res) => {
     }
 }
 
-const getProduct = (req, res) => {
-    const id = Number(req.params.id);
+const getProduct = async (req, res) => {
+    const id = req.params.id;
     try {
-        const prod = productos.getById(id);
+        const prod = await productos.getById(id);
         res.render('productView', prod);
     } catch (error) {
         console.log(error);
@@ -69,10 +69,37 @@ const getRandoms = (req, res) => {
     })
 }
 
+const getCarrito = async (req, res) => {
+    try {
+        const cart = await carritos.getByUser(req.user.username).products;
+        res.render('carrito', cart)
+    } catch (error) {
+        console.log(error);
+        res.send('Ocurrio un error');
+    }
+}
+
+const postCarrito = async (req, res) => {
+    const {prod} = req.body;
+    const cart = await carritos.getByUser(req.user.username)
+    try{
+        if (cart) {
+            const products = cart.productos.push(prod)
+            await carritos.updateByUser(req.user.username, products)
+        }
+        res.redirect('/api/carrito');
+    } catch (error) {
+        console.log(error);
+        res.send('Ocurrio un error');
+    }
+}
+
 module.exports = {
     getProducts,
     postProduct,
     getProduct,
     getTestProducts,
-    getRandoms
+    getRandoms, 
+    getCarrito,
+    postCarrito
 }

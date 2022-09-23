@@ -1,0 +1,14 @@
+{{> nav}}
+
+<div class="container d-flex justify-content-center flex-wrap">
+    {{#if cart.length}}
+        {{#each cart}}
+        <div class="card p-3 m-2" style="width: 18rem;">
+            {{>product}}
+        </div>
+        {{/each}}
+        <a href='/api/checkout/' class="btn btn-primary">Finalizar compra</a>
+    {{else}}
+        <p>No hay productos</p>
+    {{/if}}
+</div>

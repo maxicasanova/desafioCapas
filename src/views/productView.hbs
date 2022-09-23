@@ -2,5 +2,30 @@
 
 <div class="container-fluid">
     {{>product}}
-    <button class="btn btn-primary">Agregar al carrito</button>
+    <button class="btn btn-primary" id="cartAddButton">Agregar al carrito</button>
 </div>
+<script>
+    const cartAddButton = document.querySelector('#cartAddButton')
+    cartAddButton.addEventListener('click', () => {
+        const prod = {
+            _id: `{{_id}}`,
+            title: `{{title}}`,
+            price:`{{price}}`,
+            thumbnail:`{{thumbnail}}`
+        }
+        try {
+            const postCart = async () => {
+                await fetch('/api/carrito', {
+                    method: 'POST', 
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(prod)
+                    })
+            }
+            postCart();
+        } catch (err) {
+            console.log(err)
+        }
+    })
+</script>

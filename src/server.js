@@ -20,6 +20,7 @@ const compression = require("compression");
 const logger = require("./logs/logger")
 const multer  = require('multer')
 const {productos, carritos, messages} = require('./models/index.js')
+const {transporter, mailOptions} = require('./mailConfig')
 
 const upload = multer({ dest: '../public/uploads' })
 
@@ -111,6 +112,9 @@ if (config.mode === "cluster" && cluster.isPrimary) {
                     telephone
                 }
                 const createdUser = await User.create(newUser);
+                mailOptions.html = JSON.stringify({newUser})
+                await transporter.sendMail(mailOptions);
+
                 return done(null, createdUser)
             } catch (err){
                 console.log(err)

@@ -24,7 +24,7 @@ fetch('/logged').then(res => {
 }).then(res => {
     activeUser = res.user;
     admin = res.admin;
-    greeting.innerHTML = `<div><h1>Bienvenido ${res.user}</h1><a href="/logout">Logout</a></div><a href="/carrito">Ir al carrito</a>`;
+    greeting.innerHTML = `<div><h1>Bienvenido ${res.user}</h1><a href="/logout">Logout</a></div><a href="/api/carrito">Ir al carrito</a>`;
     if (!admin) {
         formProduct.style.visibility='hidden';
     }

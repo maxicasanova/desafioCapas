@@ -34,12 +34,13 @@ class ContenedorMongo {
     }
     async getById(id){
         try{
+            console.log(id)
             const data  = await this.model.findOne({_id:id})
             logger.info("Se encontro el producto con id", id);
             return data;
         } catch (error) {
-            logger.error("Error cargando productos.", error)
-            return {error: "Error guardando productos"}
+            logger.error("Error buscando producto", error)
+            return {error: "Error buscando producto"}
         }
     }
     async getByUser(user){
@@ -50,6 +51,16 @@ class ContenedorMongo {
         } catch (error) {
             logger.error("Error cargando productos.", error)
             return {error: "Error guardando productos"}
+        }
+    }
+    async updateByUser(user, products) {
+        try{
+            const data = await this.model.updateOne({user}, {products})
+            logger.info("Actualizado con exito");
+            return data;
+        } catch (error) {
+            logger.error("Error actualizando carrito", error)
+            return {error: "Error actualizando carrito"}
         }
     }
 }
