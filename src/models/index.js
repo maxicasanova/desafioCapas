@@ -1,4 +1,4 @@
-const ContenedorMongo = require('../contenedorMongo');
+const ContenedorMongo = require('../daos/contenedorMongo');
 
 const productos = new ContenedorMongo('productos',  {
     title: { type: String, required: true },

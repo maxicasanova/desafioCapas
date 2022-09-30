@@ -1,31 +1,12 @@
-const {Router} = require('express');
+import { Router } from "express";
+import cartRouter from "./carritos.routes.js";
+import mainRouter from "./main.routes.js";
+import productRouter from "./productos.routes.js";
+
 const router = Router();
 
-const {
-        getProducts, 
-        postProduct, 
-        getProduct,
-        getTestProducts,
-        getRandoms, 
-        getCarrito,
-        postCarrito
-    } = require('../controllers/routesController');
+router.use("/", mainRouter)
+router.use("/productos", productRouter)
+router.use("/carrito", cartRouter)
 
-
-
-router.get('/productos', getProducts);
-
-router.post('/productos', postProduct);
-
-router.get('/productos/:id', getProduct);
-
-router.get('/productos-test', getTestProducts)
-
-router.get('/randoms', getRandoms)
-
-router.get('/carrito', getCarrito)
-
-router.post('/carrito', postCarrito)
-
-
-module.exports = router;
+export default router;
